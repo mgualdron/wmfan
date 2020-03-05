@@ -1,16 +1,13 @@
-.TH WMLOAD 1 "September 1999"
+.TH WMFAN 1 "March 2020"
 .SH NAME
-wmload \- graphically display the kernel/system statistics
+wmfan \- graphically display the fan speed in RPM
 .SH SYNOPSIS
-.B wmload
+.B wmfan
 [ \-u <secs> ] [ \-e <program> ] [ \-l <color> ]
 [ \-p [+|\-]x [+|\-]y ] [ \-s ] [ \-i ] [ \-w ] [ \-v ]
 .SH DESCRIPTION
-\fBwmload\fP displays a graphical representation of the kernel/system
-statistics on a 64x64 miniwindow. There are three shades in the window:
-the light one, which corresponds to \fIuser\fP statistics, second is
-the \fInice time\fP statistics, and the darkest one is \fIsystem\fP
-statistics.
+\fBwmfan\fP displays a graphical representation of the cooling fan speed
+on a 64x64 miniwindow.
 .SH OPTIONS
 .TP
 .I \-u <secs>
@@ -20,7 +17,7 @@ updatespeed
 program to start on click
 .TP
 .I \-p [+|\-]x[+|\-]y
-position of wmload
+position of wmfan
 .TP
 .I \-s
 without groundplate
@@ -35,12 +32,12 @@ start up withdrawn
 output version
 .SH FILES
 .TP
-.I /proc/stat
-kernel/system statistics and other information
+.I /sys/class/hwmon/hwmon3/fan1_input
+cooling fan RPMs
 .SH AUTHORS
-.B wmload
-was written by Ryan Land <rand@bc1.com>, based on asload by Beat Christen
-<bchriste@iiic.ethz.ch>.
+.B wmfan
+was written by Miguel Gualdron, based on wmload by Ryan Land <rand@bc1.com>,
+which in turn was based on asload by Beat Christen <bchriste@iiic.ethz.ch>.
 .sp
 This manpage was written by Marcelo Magallon <mmagallo@debian.org>.
 .SH "SEE ALSO"

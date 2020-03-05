@@ -1,5 +1,5 @@
 /* wmfan - cooling fan speed monitor designed for Window Maker
-*  based on wmload
+*          based on wmload
 *  Copyright (C) 1996 Beat Christen <bchriste@iiic.ethz.ch>
 *  Copyright (C) 1997 Ryan Land <rland@bc1.com>
 *  Copyright (C) 2015 Window Maker Developers Team
@@ -139,7 +139,7 @@ void ExecuteExternal()
 	uid_t ruid, euid;
 	int pid;
 #ifdef DEBUG
-	printf("asload: system(%s)\n",Execute);
+	printf("wmfan: system(%s)\n",Execute);
 #endif
 	if( Execute[0] == '\0' ) {
 		return;
@@ -154,14 +154,14 @@ void ExecuteExternal()
 	}
 	pid = fork();
 	if ( pid == -1 ) {
-		printf("asload : fork() failed (%s), command not executed",
+		printf("wmfan : fork() failed (%s), command not executed",
 				strerror(errno));
 		return;
 	}
 	if ( pid != 0 ) {
 		/* parent process simply waits for the child and continues */
 		if ( waitpid(pid, 0, 0) == -1 ) {
-			printf("asload : waitpid() for child failed (%s)",
+			printf("wmfan : waitpid() for child failed (%s)",
 				strerror(errno));
 		}
 		return;
@@ -171,7 +171,7 @@ void ExecuteExternal()
 	 * executes the command and dies
 	 */
 	if ( setuid(ruid) ) {
-		printf("asload : setuid failed (%s), command not executed",
+		printf("wmfan : setuid failed (%s), command not executed",
 				strerror(errno));
 		exit(127);
 	}
@@ -514,57 +514,37 @@ skip_token(const char *p)
     return (char *)p;
 }
 
-void GetLoad(int Maximum, int *usr, int *nice, int *sys, int *free)
+void GetLoad(int Maximum, int *usr)
 {
   char buffer[100];/*[4096+1];*/
   int fd, len;
   int total;
   char *p;
 
-  fd = open("/proc/stat", O_RDONLY);
+  fd = open("/sys/class/hwmon/hwmon3/fan1_input", O_RDONLY);
   len = read(fd, buffer, sizeof(buffer)-1);
   close(fd);
   buffer[len] = '\0';
 
-  p = skip_token(buffer);		/* "cpu" */
+  /*
+  p = skip_token(buffer);		 "cpu" */
+  p = buffer;
 
   cp_time[0] = strtoul(p, &p, 0);	/* user   */
-  cp_time[1] = strtoul(p, &p, 0);	/* nice   */
-  cp_time[2] = strtoul(p, &p, 0);	/* system */
-  cp_time[3] = strtoul(p, &p, 0);	/* idle   */
-
-  if( (*usr  = cp_time[0] - last[0]) < 0 ) *usr = 0 ;
-  if( (*nice = cp_time[1] - last[1]) < 0 ) *nice = 0 ;
-  if( (*sys  = cp_time[2] - last[2]) < 0 ) *sys = 0 ;
-  if( (*free = cp_time[3] - last[3]) < 0 ) *free = 0 ;
-
-  total = *usr + *nice + *sys + *free;
-
+  // if( (*usr  = cp_time[0] - last[0]) < 0 ) *usr = 0 ;
+  *usr = cp_time[0];
+  total = 5000;
   last[0] = cp_time[0];
-  last[1] = cp_time[1];
-  last[2] = cp_time[2];
-  last[3] = cp_time[3];
 
-  *usr = rint(Maximum * (float)(*usr)   /total);
-  *nice =rint(Maximum * (float)(*nice)  /total);
-  *sys = rint(Maximum * (float)(*sys)   /total);
-  *free = rint(Maximum * (float)(*free) /total);
+  *usr = rint(Maximum * (float)(*usr)/total);
+
+  //printf("usr = %d\n", *usr);
 }
 
 void InsertLoad()
 {
-  int UserTime, NiceTime, SystemTime, FreeTime, act, constrain;
-  GetLoad( 52, &UserTime, &NiceTime, &SystemTime, &FreeTime);
-
-  constrain = (UserTime + NiceTime + SystemTime + FreeTime);
-  if(constrain == 53)
-    {
-      if(FreeTime > 0) FreeTime--;
-      else if(SystemTime > 0) SystemTime--;
-      else if(NiceTime > 0) NiceTime--;
-      else if(UserTime > 0) UserTime--;
-    }
-  else if(constrain == 51) FreeTime++;
+  int UserTime, act, free;
+  GetLoad( 52, &UserTime);
 
   /* Move the area */
     XCopyArea(dpy, visible.pixmap, visible.pixmap, NormalGC,
@@ -573,24 +553,17 @@ void InsertLoad()
 
     /* User Time */
     act = 58 - UserTime;
+    free = 52 - UserTime;
+
+    //printf("UserTime = %d\n", UserTime);
+    //printf("act = %d\n", act);
+    //printf("free = %d\n", free);
+
     if(UserTime > 0)
       XCopyArea(dpy, wmfan.pixmap, visible.pixmap, NormalGC,
-		Shape(6), Shape(6), 1, UserTime, Shape(57), Shape(act));
+        Shape(6), Shape(6), 1, UserTime, Shape(57), Shape(act));
 
-    /* Nice Time */
-    act = act - NiceTime;
-    if(NiceTime > 0)
+    if(free > 0)
       XCopyArea(dpy, wmfan.pixmap, visible.pixmap, NormalGC,
-		Shape(7), Shape(6), 1, NiceTime, Shape(57), Shape(act));
-
-    /* System Time */
-    act = act - SystemTime;
-    if(SystemTime > 0)
-      XCopyArea(dpy, wmfan.pixmap, visible.pixmap, NormalGC,
-		Shape(8), Shape(6), 1, SystemTime, Shape(57), Shape(act));
-
-    /* Free Time */
-    if(FreeTime > 0)
-      XCopyArea(dpy, wmfan.pixmap, visible.pixmap, NormalGC,
-		Shape(9), Shape(6), 1, FreeTime, Shape(57), Shape(6));
+		Shape(9), Shape(6), 1, free, Shape(57), Shape(6));
 }
