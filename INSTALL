@@ -1,6 +1,6 @@
 1. Check the Makefile to see if all the LIBS are ok for your system.
    ALSO, check DESTDIR and BINDIR; as they are now, a `make install'
-   will put the wmload binary in /usr/local/bin.
+   will put the wmload binary in $HOME/local/bin.
 2. `make'
 3. `make install'
 4. Enjoy!!!! (;-)

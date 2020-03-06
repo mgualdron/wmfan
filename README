@@ -1,3 +1,22 @@
+wmfan - WindowMaker cooling fan monitor
+
+This is a hack of the excellent wmload application for monitoring system load.
+
+I've modified the source system file from '/proc/stat' to
+'/sys/class/hwmon/hwmon3/fan1_input', and hardcoded the max on the y
+axis to 5000 RPM.
+
+I've also modified the Makefile so the installation takes place in $HOME.
+
+
+TODO:
+Add command-line options to set the source system file and the graph scale at
+run-time.
+
+Below is the original text from the README file for wmload-0.9.7.
+
+(Please do not contact the wmload developers with questions about wmfan.)
+
 >================================================<
 wmload - WindowMaker load gauge
 Updated, cleaned up and "fixed"
