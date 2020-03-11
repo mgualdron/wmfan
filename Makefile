@@ -1,8 +1,8 @@
 OBJS  = wmfan.o
 LIBS = -lX11 -lXpm -lXext -lm
-PREFIX = $(HOME)/local
+PREFIX = $(HOME)
 BINDIR = $(PREFIX)/bin
-MANDIR = $(PREFIX)/share/man/man1
+MANDIR = $(PREFIX)/man/man1
 INSTALL = install
 
 %.o: %.c
