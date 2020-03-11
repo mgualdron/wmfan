@@ -2,19 +2,27 @@ wmfan - WindowMaker cooling fan monitor
 
 This is a hack of the excellent wmload application for monitoring system load.
 
-I've modified the source system file from '/proc/stat' to
-'/sys/class/hwmon/hwmon3/fan1_input', and hardcoded the max on the y
-axis to 5000 RPM.
+I've added options to change the input file read, the graph scale, and an
+option to skip values in the input so that the user can choose what to plot
+when the input contains many separate values. (See the man page.)
 
 I've also modified the Makefile so the installation takes place in $HOME.
+(Look at the Makefile and modify it to suit your needs.)
 
+To build and install on a GNU/Linux system, simply type:
 
-TODO:
-Add command-line options to set the source system file and the graph scale at
-run-time.
+    make
+    make install
+
+I use this in FVWM with the following line in ~/.fvwm/config:
+
+*FvwmButtons(Swallow "wmfan" 'Exec wmfan -u 2 -f "/sys/class/hwmon/hwmon3/fan1_input" -m 5000 -e xsensors &'
+
+HISTORY:
+2020-03-11 - v0.0.2 - Added -f, -m, and -j options.
+2020-03-05 - v0.0.1 - First working version.
 
 Below is the original text from the README file for wmload-0.9.7.
-
 (Please do not contact the wmload developers with questions about wmfan.)
 
 >================================================<

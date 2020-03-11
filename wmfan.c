@@ -44,7 +44,7 @@
 
 #define major_VER 0
 #define minor_VER 0
-#define patch_VER 1
+#define patch_VER 2
 #define MW_EVENTS   (ExposureMask | ButtonPressMask | StructureNotifyMask)
 #define FALSE 0
 #define Shape(num) (ONLYSHAPE ? num-5 : num)
@@ -61,6 +61,9 @@ static char *help_message[] = {
 "    -exe <program>          program to start on click",
 "    -led <color>            color of the led",
 "    -position [+|-]x[+|-]y  position of wmfan",
+"    -file <name>            system file to read",
+"    -max <value>            maximum value for the graph scale",
+"    -jump <num>             skip over num values",
 "    -shape                  without groundplate",
 "    -iconic                 start up as icon",
 "    -withdrawn              start up withdrawn",
@@ -82,6 +85,11 @@ Window iconwin, win;       /* My home is my window */
 char *ProgName;
 char *Geometry;
 char *LedColor = "LightSeaGreen";
+char *SysFile = "/sys/class/hwmon/hwmon3/fan1_input";
+char *GraphMaxStr = "5000";
+static long GraphMaxNum;
+char *JumpStr = "0";
+int JumpNum;
 char Execute[] = "echo no program has been specified";
 char *ERR_colorcells = "not enough free color cells\n";
 char *ampers = " &";
@@ -179,6 +187,8 @@ void ExecuteExternal()
 		fprintf(stderr, "system(%s) returned an error", Execute);
 	exit(0);
 }
+
+
 int main(int argc,char *argv[])
 {
   int i;
@@ -229,6 +239,18 @@ int main(int argc,char *argv[])
 	if(++i >=argc) usage();
 	LedColor = argv[i];
 	continue;
+      case 'f':
+	if(++i >=argc) usage();
+	SysFile = argv[i];
+	continue;
+      case 'm':
+	if(++i >=argc) usage();
+	GraphMaxStr = argv[i];
+	continue;
+      case 'j':
+	if(++i >=argc) usage();
+	JumpStr = argv[i];
+	continue;
       case 'v':
 	fprintf(stdout, "\nwmfan version: %i.%i.%i\n", major_VER, minor_VER, patch_VER);
 	if(argc == 2) exit(0);
@@ -243,6 +265,9 @@ int main(int argc,char *argv[])
         usage();
       }
   }
+
+  GraphMaxNum = strtoul(GraphMaxStr, &GraphMaxStr, 0);
+  JumpNum = atoi(JumpStr);
 
   /* Open the display */
   if (!(dpy = XOpenDisplay(display_name)))
@@ -519,9 +544,10 @@ void GetLoad(int Maximum, int *usr)
   char buffer[100];/*[4096+1];*/
   int fd, len;
   int total;
+  int skip;
   char *p;
 
-  fd = open("/sys/class/hwmon/hwmon3/fan1_input", O_RDONLY);
+  fd = open(SysFile, O_RDONLY);
   len = read(fd, buffer, sizeof(buffer)-1);
   close(fd);
   buffer[len] = '\0';
@@ -529,11 +555,14 @@ void GetLoad(int Maximum, int *usr)
   /*
   p = skip_token(buffer);		 "cpu" */
   p = buffer;
+  for ( skip = 0; skip < JumpNum; skip++ ) {
+    p = skip_token(p);
+  }
 
   cp_time[0] = strtoul(p, &p, 0);	/* user   */
   // if( (*usr  = cp_time[0] - last[0]) < 0 ) *usr = 0 ;
   *usr = cp_time[0];
-  total = 5000;
+  total = GraphMaxNum;
   last[0] = cp_time[0];
 
   *usr = rint(Maximum * (float)(*usr)/total);

@@ -1,13 +1,15 @@
 .TH WMFAN 1 "March 2020"
 .SH NAME
-wmfan \- graphically display the fan speed in RPM
+wmfan \- graphically display the fan speed (or any other quantity)
 .SH SYNOPSIS
 .B wmfan
-[ \-u <secs> ] [ \-e <program> ] [ \-l <color> ]
+[ \-u <secs> ] [ \-e <program> ] [ \-l <color> ] [ \-f file ] [ \-m value ] [ \-j num ]
 [ \-p [+|\-]x [+|\-]y ] [ \-s ] [ \-i ] [ \-w ] [ \-v ]
 .SH DESCRIPTION
 \fBwmfan\fP displays a graphical representation of the cooling fan speed
 on a 64x64 miniwindow.
+.TP
+The user can display any other quantity over time by carefully setting the \-f, \-m, and \-j options.
 .SH OPTIONS
 .TP
 .I \-u <secs>
@@ -15,6 +17,16 @@ updatespeed
 .TP
 .I \-e <program>
 program to start on click
+.TP
+.I \-f <file>
+file to read from
+(default /sys/class/hwmon/hwmon3/fan1_input)
+.TP
+.I \-m <value>
+maximum value for the y-axis on the graph (default 5000)
+.TP
+.I \-j <num>
+skip this many values in the input file (default 0)
 .TP
 .I \-p [+|\-]x[+|\-]y
 position of wmfan
@@ -39,8 +51,10 @@ cooling fan RPMs
 was written by Miguel Gualdron, based on wmload by Ryan Land <rand@bc1.com>,
 which in turn was based on asload by Beat Christen <bchriste@iiic.ethz.ch>.
 .sp
-This manpage was written by Marcelo Magallon <mmagallo@debian.org>.
+This manpage was originally written by Marcelo Magallon <mmagallo@debian.org>.
+Recent updates by Miguel Gualdron.
 .SH "SEE ALSO"
+.BR wmload (1),
 .BR ps (1),
 .BR tload (1),
 .BR top (1),
